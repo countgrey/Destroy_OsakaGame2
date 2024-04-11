@@ -6,10 +6,12 @@ void Game::InitVariables()
 	this->p_Window	= nullptr;
 
 	this->Points				= 0;
-	this->EnemySpawnTimerMax	= 10.f;
+	this->Multiplier			= 1;
+	this->EnemySpawnTimerMax	= 3.f;
 	this->EnemySpawnTimer		= this->EnemySpawnTimerMax;
 	this->MaxEnemys				= 15;
 	this->MouseHeld				= false;
+	this->IsHeat				= false;
 
 	if (!this->BG_Texture.loadFromFile("assets/images/bg.png"))
 	{
@@ -21,8 +23,8 @@ void Game::InitVariables()
 
 void Game::InitWindow()
 {
-	this->p_VMode.width		= 800;
-	this->p_VMode.height	= 600;
+	this->p_VMode.width		= 1280;
+	this->p_VMode.height	= 960;
 	
 	this->p_Title			= "Destroy the Osaka:The Game";
 
@@ -146,7 +148,8 @@ void Game::UpdateEnemy()
 		if (this->p_EnemyVector[i].GetEnemySprite().getPosition().y > this->p_Window->getSize().y)
 			this->p_EnemyVector.erase(this->p_EnemyVector.begin() + i);
 	}
-
+	
+	IsHeat = false;
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 	{
 		if (this->MouseHeld == false)
@@ -157,12 +160,17 @@ void Game::UpdateEnemy()
 				if (this->p_EnemyVector[i].GetEnemySprite().getGlobalBounds().contains(this->MousePosView))
 				{
 					this->p_EnemyVector.erase(this->p_EnemyVector.begin() + i);
-
-					this->Points += 1;
+					this->IsHeat = true;
+					this->Points += 1 * this->Multiplier;
+					this->Multiplier += 0.5;
+					//this->p_Window->setFramerateLimit(this->Points+60);
 					this->SpawnExplode(this->MousePosView);
 					snd.play();
 					break;
 				}
+			}
+			if (!this->IsHeat) {
+				this->Multiplier = 1;
 			}
 		}
 	}
@@ -181,9 +189,22 @@ void Game::RenderText(sf::RenderTarget& target)
 void Game::UpdateText()
 {
 	std::stringstream ss;
+	sf::Color textColor = sf::Color::White;
+
+	if (this->Multiplier > 1) {
+		textColor = sf::Color::Green;
+	}
+	else {
+		textColor = sf::Color::White;
+	}
 
 	ss << "Points: " << this->Points;
+	ss << "    Multiplier: " << this->Multiplier << "x";
 	this->Text.setString(ss.str());
+	if (static_cast<int>(this->Multiplier) % 2 == 0) {
+		sf::Color randomColor = sf::Color(rand() % 256, rand() % 256, rand() % 256);
+		this->Text.setFillColor(randomColor);
+	}
 }
 
 void Game::SpawnEnemy()
@@ -193,7 +214,9 @@ void Game::SpawnEnemy()
 		static_cast<float>(rand() % static_cast<int>((this->p_Window->getSize().y - 200.f) - this->p_Enemy.GetSize().y)))
 	);
 
-	this->p_Enemy.YSpeed = 0.5f + static_cast<float>(rand() % 6);
+	this->p_Enemy.YSpeed = 0.5f + static_cast<float>(this->Points / 50);
+	this->MaxEnemys += this->Points / 20;
+
 
 	this->p_EnemyVector.push_back(this->p_Enemy);
 }

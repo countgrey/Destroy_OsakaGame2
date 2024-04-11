@@ -1,16 +1,6 @@
 #include "Enemy.h"
 #include <iostream>
 
-void Enemy::InitEnemy()
-{
-	if (!this->p_EnemyTexture.loadFromFile("assets/images/enemy/enemy.png"))
-	{
-		std::cout << "Can't load assets/images/enemy/enemy.png" << std::endl;
-	}
-
-	this->p_Enemy.setTexture(this->p_EnemyTexture);
-	this->YSpeed = static_cast<float>(rand() % 6);
-}
 
 Enemy::Enemy()
 {

@@ -47,6 +47,8 @@ class Game
 	float EnemySpawnTimerMax;
 	unsigned int MaxEnemys;
 	bool MouseHeld;
+	bool IsHeat;
+	float Multiplier;
 
 	//Позиция мышки
 	sf::Vector2i MousePosWindow;
